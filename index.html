@@ -1,0 +1,189 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Trial Target Radar</title>
+    <link rel="preconnect" href="https://clinicaltrials.gov" />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <header class="topbar">
+      <div>
+        <p class="eyebrow">Clinical development monitor</p>
+        <h1>Trial Target Radar</h1>
+      </div>
+      <div class="source-panel">
+        <span id="sourceStatus" class="status-dot pending"></span>
+        <div>
+          <strong id="sourceLabel">Connecting to ClinicalTrials.gov</strong>
+          <span id="sourceMeta">Live API refresh status will appear here.</span>
+        </div>
+      </div>
+    </header>
+
+    <main class="app-shell">
+      <aside class="controls" aria-label="Tracker controls">
+        <section class="control-section">
+          <label for="diseaseInput">Disease</label>
+          <div class="input-row">
+            <input id="diseaseInput" list="diseaseOptions" value="non-small cell lung cancer" />
+            <button id="clearDisease" type="button" title="Clear disease filter" aria-label="Clear disease filter">&times;</button>
+          </div>
+          <datalist id="diseaseOptions">
+            <option value="non-small cell lung cancer"></option>
+            <option value="breast cancer"></option>
+            <option value="multiple myeloma"></option>
+            <option value="colorectal cancer"></option>
+            <option value="melanoma"></option>
+            <option value="glioblastoma"></option>
+            <option value="Alzheimer disease"></option>
+            <option value="obesity"></option>
+            <option value="Crohn disease"></option>
+          </datalist>
+        </section>
+
+        <section class="control-section">
+          <div class="section-title">
+            <label for="targetSearch">Targets <small id="targetCount"></small></label>
+            <button id="clearTargetFocus" type="button">Clear</button>
+          </div>
+          <input id="targetSearch" placeholder="Filter target list" />
+          <p id="targetFocusHint" class="helper-text">Browse all targets, then click one to focus the dashboard.</p>
+          <div id="targetList" class="target-list"></div>
+        </section>
+
+        <section class="control-section">
+          <label for="statusFilter">Trial status</label>
+          <select id="statusFilter">
+            <option value="active">Recruiting + not yet recruiting</option>
+            <option value="RECRUITING">Recruiting only</option>
+            <option value="NOT_YET_RECRUITING">Not yet recruiting only</option>
+            <option value="all">Any status</option>
+          </select>
+        </section>
+
+        <section class="control-section">
+          <label for="phaseFilter">Phase</label>
+          <select id="phaseFilter">
+            <option value="">All phases</option>
+            <option value="PHASE1">Phase 1</option>
+            <option value="PHASE2">Phase 2</option>
+            <option value="PHASE3">Phase 3</option>
+            <option value="PHASE4">Phase 4</option>
+          </select>
+        </section>
+
+        <section class="control-section">
+          <label for="therapyFilter">Therapy type</label>
+          <select id="therapyFilter">
+            <option value="">All therapy types</option>
+            <option value="small-molecule">Small molecule</option>
+            <option value="antibody">Antibody / ADC</option>
+            <option value="cell-gene">Gene or cell therapy</option>
+            <option value="other">Other / unclear</option>
+          </select>
+        </section>
+
+        <section class="control-section">
+          <label for="sourceFilter">Trial source</label>
+          <select id="sourceFilter">
+            <option value="global">ClinicalTrials.gov worldwide</option>
+            <option value="china">ClinicalTrials.gov China sites</option>
+            <option value="global-china">Worldwide + China-site emphasis</option>
+          </select>
+          <p class="helper-text">China-site mode uses structured ClinicalTrials.gov location data. Cards include ChiCTR search links for China registry follow-up.</p>
+        </section>
+
+        <section class="control-section">
+          <label for="customTarget">Add watch target</label>
+          <div class="stacked-inputs">
+            <input id="customTarget" placeholder="Target, e.g. TROP2" />
+            <input id="customDisease" placeholder="Disease hint, optional" />
+            <input id="customStocks" placeholder="Tickers, e.g. GILD, AZN" />
+            <button id="addTarget" type="button">Add to tracker</button>
+          </div>
+        </section>
+      </aside>
+
+      <section class="workspace">
+        <div class="toolbar">
+          <div class="metric-strip">
+            <div>
+              <span id="totalTrials">0</span>
+              <small>matched studies</small>
+            </div>
+            <div>
+              <span id="recruitingCount">0</span>
+              <small>recruiting</small>
+            </div>
+            <div>
+              <span id="stockCount">0</span>
+              <small>linked tickers</small>
+            </div>
+            <div>
+              <span id="nextUpdate">None</span>
+              <small>next milestone</small>
+            </div>
+          </div>
+          <button id="refreshButton" type="button">Refresh</button>
+        </div>
+
+        <section class="chart-band" aria-label="Trial summary charts">
+          <div class="chart-card">
+            <div class="chart-heading">
+              <h2>Target activity</h2>
+              <span>active studies by selected target</span>
+            </div>
+            <div id="activityChart" class="bar-chart"></div>
+          </div>
+          <div class="chart-card">
+            <div class="chart-heading">
+              <h2>Phase mix</h2>
+              <span>development stage split</span>
+            </div>
+            <div id="phaseChart" class="phase-chart"></div>
+          </div>
+        </section>
+
+        <section class="table-section">
+          <div class="section-heading">
+            <div>
+              <h2>Developing target watchlist</h2>
+              <p>Live matches from ClinicalTrials.gov with inferred sponsor-stock links and milestone dates.</p>
+            </div>
+            <div id="loadingState" class="loading-state">Idle</div>
+          </div>
+          <div id="cards" class="cards" aria-live="polite"></div>
+        </section>
+
+        <section class="table-section compact">
+          <div class="section-heading">
+            <div>
+              <h2>Upcoming updates</h2>
+              <p>Nearest primary completion, completion, or last posted dates found in matched records.</p>
+            </div>
+          </div>
+          <div id="timeline" class="timeline"></div>
+        </section>
+      </section>
+    </main>
+
+    <template id="targetCardTemplate">
+      <article class="target-card">
+        <div class="card-top">
+          <div>
+            <h3></h3>
+            <p class="subline"></p>
+          </div>
+          <span class="badge"></span>
+        </div>
+        <div class="card-metrics"></div>
+        <div class="stock-row"></div>
+        <div class="study-list"></div>
+      </article>
+    </template>
+
+    <script src="app.js?v=5"></script>
+  </body>
+</html>
