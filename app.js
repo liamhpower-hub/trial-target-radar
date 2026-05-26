@@ -848,14 +848,14 @@ const defaultTargets = [
     name: "S1P receptor",
     disease: "multiple sclerosis",
     stocks: ["BMY", "NVS", "JNJ"],
-    keywords: ["S1P", "sphingosine-1-phosphate", "ozanimod", "fingolimod", "ponesimod"],
+    keywords: ["S1P", "sphingosine-1-phosphate", "ozanimod", "fingolimod", "ponesimod", "multiple sclerosis"],
   },
   {
     id: "nrf2",
     name: "NRF2",
     disease: "multiple sclerosis",
     stocks: ["BIIB", "RETA", "MRK"],
-    keywords: ["NRF2", "NFE2L2", "dimethyl fumarate", "omaveloxolone"],
+    keywords: ["NRF2", "NFE2L2", "dimethyl fumarate", "omaveloxolone", "multiple sclerosis"],
   },
   {
     id: "fcRn",
@@ -870,6 +870,55 @@ const defaultTargets = [
     disease: "multiple sclerosis",
     stocks: ["RHHBY", "NVS", "TGTH"],
     keywords: ["CD20", "ocrelizumab", "ofatumumab", "ublituximab", "multiple sclerosis"],
+  },
+  {
+    id: "btk-ms",
+    name: "BTK autoimmune",
+    disease: "multiple sclerosis",
+    stocks: ["SNY", "MRK", "RHHBY", "TGTH"],
+    keywords: ["BTK", "Bruton", "tolebrutinib", "evobrutinib", "fenebrutinib", "remibrutinib", "multiple sclerosis"],
+  },
+  {
+    id: "alpha4-integrin-ms",
+    name: "alpha4 integrin",
+    disease: "multiple sclerosis",
+    stocks: ["BIIB", "RHHBY", "TAK"],
+    keywords: ["alpha4 integrin", "alpha-4 integrin", "natalizumab", "multiple sclerosis"],
+  },
+  {
+    id: "cd52",
+    name: "CD52",
+    disease: "multiple sclerosis",
+    stocks: ["SNY", "BAYRY", "MRK"],
+    keywords: ["CD52", "alemtuzumab", "multiple sclerosis"],
+  },
+  {
+    id: "cd40l",
+    name: "CD40L",
+    disease: "multiple sclerosis",
+    stocks: ["SNY", "UCB", "BMY"],
+    keywords: ["CD40L", "CD154", "frexalimab", "dapirolizumab", "multiple sclerosis"],
+  },
+  {
+    id: "lingo1",
+    name: "LINGO-1",
+    disease: "multiple sclerosis",
+    stocks: ["BIIB", "RHHBY", "NVS"],
+    keywords: ["LINGO-1", "LINGO1", "opicinumab", "remyelination", "multiple sclerosis"],
+  },
+  {
+    id: "kappa-opioid-receptor-ms",
+    name: "Kappa opioid receptor",
+    disease: "multiple sclerosis",
+    stocks: ["MNOV", "MRK", "NVS"],
+    keywords: ["kappa opioid receptor", "ibudilast", "MN-166", "multiple sclerosis"],
+  },
+  {
+    id: "ebv-ms",
+    name: "EBV-directed therapy",
+    disease: "multiple sclerosis",
+    stocks: ["ATAI", "MRNA", "GSK"],
+    keywords: ["EBV", "Epstein-Barr", "multiple sclerosis", "ATA188", "vaccine"],
   },
   {
     id: "baff-april",
@@ -1416,10 +1465,17 @@ function dedupeBy(items, key) {
 }
 
 function init() {
+  applyUrlState();
   renderTargetList();
   bindEvents();
   checkSourceVersion();
   refresh();
+}
+
+function applyUrlState() {
+  const params = new URLSearchParams(window.location.search);
+  const disease = params.get("disease");
+  if (disease) els.diseaseInput.value = disease;
 }
 
 function bindEvents() {
@@ -1434,6 +1490,7 @@ function bindEvents() {
     refresh();
   });
   els.diseaseInput.addEventListener("change", refresh);
+  els.diseaseInput.addEventListener("change", renderTargetList);
   els.statusFilter.addEventListener("change", refresh);
   els.phaseFilter.addEventListener("change", renderDashboard);
   els.therapyFilter.addEventListener("change", renderDashboard);
@@ -1444,13 +1501,16 @@ function bindEvents() {
 
 function renderTargetList() {
   const query = els.targetSearch.value.trim().toLowerCase();
-  const filteredTargets = targets.filter((target) => `${target.name} ${target.disease} ${target.stocks.join(" ")}`.toLowerCase().includes(query));
+  const disease = els.diseaseInput.value.trim();
+  const filteredTargets = targets
+    .filter((target) => `${target.name} ${target.disease} ${target.stocks.join(" ")}`.toLowerCase().includes(query))
+    .sort((a, b) => Number(targetMatchesDisease(b, disease)) - Number(targetMatchesDisease(a, disease)));
   els.targetCount.textContent = `${filteredTargets.length} of ${targets.length}`;
   const focusedTarget = getFocusedTarget();
   els.clearTargetFocus.disabled = !focusedTarget;
   els.targetFocusHint.textContent = focusedTarget
     ? `Focused on ${focusedTarget.name}. Clear focus to return to the landscape view.`
-    : `Landscape view fetches the first ${DEFAULT_FETCH_LIMIT} targets by default. Click any target to explore it.`;
+    : `Disease search fetches matching targets first; otherwise landscape view fetches the first ${DEFAULT_FETCH_LIMIT}. Click any target to explore it.`;
   els.targetList.innerHTML = "";
   filteredTargets.forEach((target) => {
     const button = document.createElement("button");
@@ -1542,7 +1602,33 @@ function getFocusedTarget() {
 function getActiveTargets() {
   const focusedTarget = getFocusedTarget();
   if (focusedTarget) return [focusedTarget];
+  const disease = els.diseaseInput.value.trim();
+  if (!disease) return targets.slice(0, DEFAULT_FETCH_LIMIT);
+  const diseaseMatches = targets.filter((target) => targetMatchesDisease(target, disease));
+  if (diseaseMatches.length) return diseaseMatches.slice(0, DEFAULT_FETCH_LIMIT);
   return targets.slice(0, DEFAULT_FETCH_LIMIT);
+}
+
+function targetMatchesDisease(target, disease) {
+  const terms = normalizeDiseaseTerms(disease);
+  const haystack = [target.name, target.disease, ...(target.keywords || [])].join(" ").toLowerCase();
+  return terms.some((term) => haystack.includes(term));
+}
+
+function normalizeDiseaseTerms(disease) {
+  const value = disease.toLowerCase();
+  const terms = new Set([value]);
+  if (value.includes("multiple sclerosis") || value === "ms") {
+    ["multiple sclerosis", "relapsing multiple sclerosis", "progressive multiple sclerosis"].forEach((term) => terms.add(term));
+    if (value === "ms") terms.add("ms");
+  }
+  if (value.includes("non-small cell lung") || value.includes("nsclc")) {
+    ["non-small cell lung cancer", "nsclc", "lung cancer"].forEach((term) => terms.add(term));
+  }
+  if (value.includes("mash") || value.includes("nash")) {
+    ["mash", "nash", "steatohepatitis"].forEach((term) => terms.add(term));
+  }
+  return [...terms];
 }
 
 async function fetchTargetStudies(target) {
