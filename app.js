@@ -362,10 +362,6 @@ const els = {
   targetList: document.querySelector("#targetList"),
   targetCount: document.querySelector("#targetCount"),
   searchInput: document.querySelector("#searchInput"),
-  totalCost: document.querySelector("#totalCost"),
-  medianCost: document.querySelector("#medianCost"),
-  signalCount: document.querySelector("#signalCount"),
-  recordCount: document.querySelector("#recordCount"),
   portfolioReadout: document.querySelector("#portfolioReadout"),
   resetFilters: document.querySelector("#resetFilters"),
   exportView: document.querySelector("#exportView"),
@@ -407,15 +403,7 @@ function actionClass(action) {
 }
 
 function renderSummary(records) {
-  const costs = records.map(modeledCost);
-  const total = costs.reduce((sum, value) => sum + value, 0);
-  const averageCost = records.length ? total / records.length : 0;
   const signalCount = records.filter((record) => record.signal).length;
-
-  els.totalCost.textContent = currency.format(total);
-  els.medianCost.textContent = currency.format(averageCost);
-  els.signalCount.textContent = String(signalCount);
-  els.recordCount.textContent = String(records.length);
 
   if (!records.length) {
     els.portfolioReadout.textContent =
@@ -426,11 +414,10 @@ function renderSummary(records) {
   const discontinue = records.filter((record) =>
     ["Discontinue program", "No filing", "Strategic review"].includes(record.action),
   ).length;
-  els.portfolioReadout.textContent = `${records.length} disclosure${
+  const targetCount = targetGroups(records).length;
+  els.portfolioReadout.textContent = `${records.length} failure record${
     records.length === 1 ? "" : "s"
-  } loaded. Estimated exposure totals ${currency.format(
-    total,
-  )} across the filtered programs. ${signalCount} showed some residual efficacy or biological signal, while ${discontinue} pointed to no filing, program wind-down, or strategic review.`;
+  } indexed across ${targetCount} target${targetCount === 1 ? "" : "s"}. ${signalCount} showed residual efficacy or biological signal, while ${discontinue} pointed to no filing, program wind-down, or strategic review. Search by company, target, mechanism, endpoint, or failure pattern.`;
 }
 
 function renderCards(records) {

@@ -230,47 +230,6 @@ input[type="checkbox"] {
   background: #fff;
 }
 
-.summary-grid {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  border-bottom: 1px solid var(--line);
-}
-
-.summary-grid article {
-  min-height: 118px;
-  padding: 18px;
-  border-right: 1px solid var(--line);
-  background: #fff;
-}
-
-.summary-grid article:last-child {
-  border-right: 0;
-}
-
-.summary-grid span {
-  display: block;
-  min-height: 32px;
-  color: var(--muted);
-  font-size: 0.72rem;
-  font-weight: 900;
-  text-transform: uppercase;
-}
-
-.summary-grid strong {
-  display: block;
-  font-family: Georgia, "Times New Roman", serif;
-  font-size: clamp(1.8rem, 3.2vw, 2.8rem);
-  line-height: 1;
-}
-
-.summary-grid small {
-  display: block;
-  margin-top: 10px;
-  color: var(--muted);
-  font-size: 0.78rem;
-  line-height: 1.25;
-}
-
 .insight-band {
   display: grid;
   grid-template-columns: minmax(0, 1fr) 180px;
@@ -773,14 +732,8 @@ textarea {
   }
 
   .filters,
-  .summary-grid,
   .insight-band {
     grid-template-columns: 1fr;
-  }
-
-  .summary-grid article {
-    border-right: 0;
-    border-bottom: 1px solid var(--line);
   }
 
   .scheduler-head,
