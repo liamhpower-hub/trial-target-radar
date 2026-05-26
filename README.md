@@ -20,7 +20,7 @@ Stop the server with `Ctrl+C`.
 
 ## What It Tracks
 
-- Disease filter and searchable target browser
+- Disease dropdown and searchable target browser
 - Disease-aware landscape loading so indications such as multiple sclerosis prioritize relevant targets
 - Default landscape mode with click-to-focus target exploration
 - Built-in catalog of 180+ clinical development targets

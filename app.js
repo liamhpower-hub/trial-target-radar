@@ -2,6 +2,74 @@ const API_BASE = "https://clinicaltrials.gov/api/v2";
 const STORAGE_KEY = "trial-target-radar-targets-v1";
 const DEFAULT_FETCH_LIMIT = 10;
 
+const diseaseCatalog = [
+  "acute lymphoblastic leukemia",
+  "acute myeloid leukemia",
+  "Alzheimer disease",
+  "amyotrophic lateral sclerosis",
+  "asthma",
+  "atopic dermatitis",
+  "ATTR amyloidosis",
+  "B-cell lymphoma",
+  "breast cancer",
+  "cardiovascular disease",
+  "chronic lymphocytic leukemia",
+  "cholangiocarcinoma",
+  "complement-mediated disease",
+  "colorectal cancer",
+  "Crohn disease",
+  "cutaneous T-cell lymphoma",
+  "cystic fibrosis",
+  "diabetes",
+  "Duchenne muscular dystrophy",
+  "dyslipidemia",
+  "glioblastoma",
+  "heart failure",
+  "hepatitis B",
+  "hereditary angioedema",
+  "HIV",
+  "Hodgkin lymphoma",
+  "Huntington disease",
+  "hypercholesterolemia",
+  "hypertriglyceridemia",
+  "inflammatory bowel disease",
+  "influenza",
+  "lupus",
+  "MASH",
+  "melanoma",
+  "mesothelioma",
+  "migraine",
+  "multiple myeloma",
+  "multiple sclerosis",
+  "myasthenia gravis",
+  "myelodysplastic syndrome",
+  "myelofibrosis",
+  "neuroblastoma",
+  "neuropsychiatric disorder",
+  "non-small cell lung cancer",
+  "obesity",
+  "ovarian cancer",
+  "pain",
+  "Parkinson disease",
+  "paroxysmal nocturnal hemoglobinuria",
+  "prostate cancer",
+  "psoriasis",
+  "pulmonary arterial hypertension",
+  "rare metabolic disease",
+  "renal cell carcinoma",
+  "respiratory syncytial virus",
+  "rheumatoid arthritis",
+  "sarcoma",
+  "schizophrenia",
+  "sleep disorder",
+  "small cell lung cancer",
+  "solid tumor",
+  "spinal muscular atrophy",
+  "thrombosis",
+  "type 2 diabetes",
+  "urothelial cancer",
+];
+
 const defaultTargets = [
   {
     id: "kras-g12c",
@@ -1465,6 +1533,7 @@ function dedupeBy(items, key) {
 }
 
 function init() {
+  populateDiseaseDropdown();
   applyUrlState();
   renderTargetList();
   bindEvents();
@@ -1472,10 +1541,38 @@ function init() {
   refresh();
 }
 
+function populateDiseaseDropdown() {
+  const diseases = [...new Set([
+    "",
+    ...diseaseCatalog,
+    ...targets.map((target) => target.disease),
+  ])].sort((a, b) => {
+    if (!a) return -1;
+    if (!b) return 1;
+    return a.localeCompare(b);
+  });
+  els.diseaseInput.innerHTML = diseases
+    .map((disease) => `<option value="${escapeHtml(disease)}">${escapeHtml(disease || "All diseases")}</option>`)
+    .join("");
+  els.diseaseInput.value = "non-small cell lung cancer";
+}
+
 function applyUrlState() {
   const params = new URLSearchParams(window.location.search);
   const disease = params.get("disease");
-  if (disease) els.diseaseInput.value = disease;
+  if (disease) {
+    ensureDiseaseOption(disease);
+    els.diseaseInput.value = disease;
+  }
+}
+
+function ensureDiseaseOption(disease) {
+  const exists = [...els.diseaseInput.options].some((option) => option.value.toLowerCase() === disease.toLowerCase());
+  if (exists) return;
+  const option = document.createElement("option");
+  option.value = disease;
+  option.textContent = disease;
+  els.diseaseInput.appendChild(option);
 }
 
 function bindEvents() {
