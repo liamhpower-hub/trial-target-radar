@@ -22,6 +22,7 @@ Stop the server with `Ctrl+C`.
 
 - Disease filter and searchable target browser
 - Default landscape mode with click-to-focus target exploration
+- Built-in catalog of 180+ clinical development targets
 - Recruiting and not-yet-recruiting trial status
 - Phase filters
 - Therapy type filters for small molecules, antibodies/ADCs, and gene or cell therapies
