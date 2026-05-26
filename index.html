@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>TrialFail Ledger</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <header class="topbar">
+      <div>
+        <p class="eyebrow">Clinical development intelligence</p>
+        <h1>TrialFail Ledger</h1>
+      </div>
+      <div class="top-actions" aria-label="Dashboard controls">
+        <button id="resetFilters" class="icon-button" type="button" title="Reset filters" aria-label="Reset filters">R</button>
+        <button id="exportView" class="command-button" type="button">Export memo</button>
+      </div>
+    </header>
+
+    <main class="layout">
+      <aside class="filters" aria-label="Filters">
+        <label class="search-box">
+          <span>Search</span>
+          <input id="searchInput" type="search" placeholder="Search failures..." />
+        </label>
+
+        <section class="assumption-panel">
+          <div class="panel-heading">
+            <h2>Search Scope</h2>
+            <span>Indexed</span>
+          </div>
+          <p>
+            Search spans company, asset, trial, indication, target, mechanism, endpoint failure, and reusable target
+            context.
+          </p>
+        </section>
+
+        <fieldset>
+          <legend>Failure Mode</legend>
+          <label><input type="checkbox" name="mode" value="Primary endpoint miss" checked /> Primary miss</label>
+          <label><input type="checkbox" name="mode" value="Futility / unlikely to meet" checked /> Futility</label>
+          <label><input type="checkbox" name="mode" value="Statistical miss with signal" checked /> Signal but underpowered</label>
+        </fieldset>
+
+        <fieldset>
+          <legend>Company Action</legend>
+          <label><input type="checkbox" name="action" value="Continue analysis" checked /> Continue analysis</label>
+          <label><input type="checkbox" name="action" value="Discontinue program" checked /> Discontinue program</label>
+          <label><input type="checkbox" name="action" value="Strategic review" checked /> Strategic review</label>
+          <label><input type="checkbox" name="action" value="No filing" checked /> No filing</label>
+        </fieldset>
+
+        <section class="assumption-panel">
+          <div class="panel-heading">
+            <h2>Cost Method</h2>
+            <span>Read-only</span>
+          </div>
+          <dl class="method-list">
+            <div><dt>Patient basis</dt><dd>$175k / randomized patient</dd></div>
+            <div><dt>Operations</dt><dd>Program-specific fixed estimate</dd></div>
+            <div><dt>Disclosure layer</dt><dd>Publicly stated charges when available</dd></div>
+          </dl>
+          <p>Cost basis is locked so every disclosure is compared with the same methodology.</p>
+        </section>
+      </aside>
+
+      <section class="workspace" aria-live="polite">
+        <section class="summary-grid" aria-label="Portfolio summary">
+          <article>
+            <span>Estimated Trial Exposure</span>
+            <strong id="totalCost">$0</strong>
+            <small>Visible programs, modeled basis</small>
+          </article>
+          <article>
+            <span>Avg Exposure / Program</span>
+            <strong id="medianCost">$0</strong>
+            <small>Modeled average, not reported loss</small>
+          </article>
+          <article>
+            <span>Programs Showing Signal</span>
+            <strong id="signalCount">0</strong>
+            <small>Residual efficacy or biology noted</small>
+          </article>
+          <article>
+            <span>Failure Records</span>
+            <strong id="recordCount">0</strong>
+            <small>Current filtered set</small>
+          </article>
+        </section>
+
+        <section class="insight-band">
+          <div>
+            <p class="eyebrow">Plain-English readout</p>
+            <h2 id="portfolioReadout">Loading trial readouts...</h2>
+          </div>
+          <div class="sparkline" aria-hidden="true">
+            <span></span><span></span><span></span><span></span><span></span>
+          </div>
+        </section>
+
+        <section class="scheduler" aria-label="Expected results timeline">
+          <header class="scheduler-head">
+            <div>
+              <p class="eyebrow">Scheduler</p>
+              <h2>Expected Results Timeline</h2>
+            </div>
+            <strong id="timelineCount">0 tracked events</strong>
+          </header>
+          <section id="timelineList" class="timeline-list"></section>
+        </section>
+
+        <section class="target-map" aria-label="Target and mechanism map">
+          <header class="scheduler-head">
+            <div>
+              <p class="eyebrow">Target Reuse</p>
+              <h2>Failure Lessons by Target</h2>
+            </div>
+            <strong id="targetCount">0 targets mapped</strong>
+          </header>
+          <section id="targetList" class="target-list"></section>
+        </section>
+
+        <section id="trialList" class="trial-list" aria-label="Trial failure records"></section>
+      </section>
+    </main>
+
+    <dialog id="memoDialog">
+      <form method="dialog">
+        <header>
+          <h2>Export Memo</h2>
+          <button class="icon-button" value="cancel" title="Close" aria-label="Close">X</button>
+        </header>
+        <textarea id="memoOutput" readonly></textarea>
+        <menu>
+          <button value="cancel">Close</button>
+        </menu>
+      </form>
+    </dialog>
+
+    <script src="app.js"></script>
+  </body>
+</html>
